@@ -1,0 +1,9 @@
+@font-face {
+  font-family: 'jf-openhuninn';
+  font-display: swap;
+  src: url('../fonts/jf-openhuninn-2.1.ttf');
+}
+
+body {
+  font-family: 'jf-openhuninn'
+}
