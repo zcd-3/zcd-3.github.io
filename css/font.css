@@ -1,9 +1,9 @@
 @font-face {
-  font-family: 'jf-openhuninn';
+  font-family: 'Myfont';
   font-display: swap;
-  src: url('../fonts/jf-openhuninn-2.1.ttf');
+  src: url('../fonts/SeuratProN-M.otf');
 }
 
 body {
-  font-family: 'jf-openhuninn'
+  font-family: 'Myfont'
 }
