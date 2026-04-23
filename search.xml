@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>gitlet个人记录</title>
+      <link href="/post/gitlet%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/"/>
+      <url>/post/gitlet%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>从开始动手到完工约16h<br>跨度4days，这几天基本上除了上课就是写这个<br>当然很多东西问了ai,把我的copilot额度差点干完了</p><p>开始前看完spec人都是懵的，而且英语太差很多具体意思扫一眼根本看不懂，参考了别人的persistence再仔细钻研(问ai)后脑子才慢慢有个框架。感觉最难的部分就是起步阶段，起步啥都没有，想写点什么就会发现它的依赖项还没写，去写依赖项时又发现它依赖别的，或又依赖回刚才的东西，会比较困难一点。而且debug起来比较麻烦，反正我是纯通过test结果自己找bug，找得挺痛苦的。现在回看之前所有的project都跟过家家一样，gitlet的skeleton代码简直就是一具空壳，you have to design almost everything by youself.</p><p>一些记录下来的bug<br>1<br>in Commit.java</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Update the stage area to a new commit. */</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">clearStage</span><span class="params">()</span> &#123;  </span><br><span class="line">    <span class="type">Stage</span> <span class="variable">stg</span> <span class="operator">=</span> Repository.getStage();  </span><br><span class="line">    Set&lt;String&gt; removeStage = stg.getRemoveStage();  </span><br><span class="line">    pathToBlobs = stg.getAddStage();  </span><br><span class="line">    Map&lt;String, String&gt; parentMap = getParent().getPathToBlobs();  </span><br><span class="line">    <span class="keyword">for</span> (Map.Entry&lt;String, String&gt; e : parentMap.entrySet()) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (!removeStage.contains(e.getKey())) &#123;  </span><br><span class="line">            pathToBlobs.put(e.getKey(), e.getValue());  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">    stg.clear();  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>把pathToBlobs指到了stage的addStage上，然后最后stg.clear()后啥都没了，，，</p><p>第二个bug也在上面那一段里<br>添加parent记录的if判断那里少了，要判断是否已经在pathToBlobs里，否则可能会覆盖了。</p><p>3</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** status method */</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">status</span><span class="params">()</span> &#123;  </span><br><span class="line">    <span class="comment">/// branches part  </span></span><br><span class="line">    System.out.println(<span class="string">&quot;===  Branches ===&quot;</span>);  </span><br><span class="line">    <span class="type">String</span> <span class="variable">curHead</span> <span class="operator">=</span> getCurHead();  </span><br><span class="line">    List&lt;String&gt; branches = plainFilenamesIn(HEAD_DIR);  </span><br><span class="line">    System.out.println(<span class="string">&quot;*&quot;</span> + curHead);  </span><br><span class="line">    <span class="keyword">for</span> (String b : branches) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (!b.equals(curHead)) &#123;  </span><br><span class="line">            System.out.println(b);  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">    System.out.println();</span><br></pre></td></tr></table></figure><p>Branches前面多加了一个空格，，，</p><p>4<br>split point算法需要考虑secondParent</p><p>5<br>main函数的case里忘加break;  了解了java switch case格式的穿透性</p><p>extra:<br>忘记编译文件，新的reset都没编译进去，跑半天Main函数那里直接跳过了怎么正确，，</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> CS </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> gitlet </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>接雨水</title>
       <link href="/post/%E6%8E%A5%E9%9B%A8%E6%B0%B4/"/>
       <url>/post/%E6%8E%A5%E9%9B%A8%E6%B0%B4/</url>
