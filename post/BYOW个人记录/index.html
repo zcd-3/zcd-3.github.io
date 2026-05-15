@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>BYOW个人记录 | zcd's blog</title><meta name="author" content="zcd"><meta name="copyright" content="zcd"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="从开始写 BYOW 到最后收尾，感觉这个项目比前面的 proj 更像是在真正做一个小型游戏系统。最后实现出来的版本大致包括：根据 seed 确定性生成随机世界，房间之间用 MST 保证连通，再额外加一些边让地图不那么像树；玩家可以通过 WASD 移动，:Q 保存，L 读取，R 回放，M 返回菜单；HUD 会显示鼠标所在 tile 的描述和当前收集进度；地图里有多个 light source，玩家走">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BYOW个人记录">
+<meta property="og:url" content="https://311duck.cn/post/BYOW%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/">
+<meta property="og:site_name" content="zcd&#39;s blog">
+<meta property="og:description" content="从开始写 BYOW 到最后收尾，感觉这个项目比前面的 proj 更像是在真正做一个小型游戏系统。最后实现出来的版本大致包括：根据 seed 确定性生成随机世界，房间之间用 MST 保证连通，再额外加一些边让地图不那么像树；玩家可以通过 WASD 移动，:Q 保存，L 读取，R 回放，M 返回菜单；HUD 会显示鼠标所在 tile 的描述和当前收集进度；地图里有多个 light source，玩家走">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://311duck.cn/img/202202230023069.jpg">
+<meta property="article:published_time" content="2026-05-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-15T16:44:49.715Z">
+<meta property="article:author" content="zcd">
+<meta property="article:tag" content="BYOW">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://311duck.cn/img/202202230023069.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "BYOW个人记录",
+  "url": "https://311duck.cn/post/BYOW%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/",
+  "image": "https://311duck.cn/img/202202230023069.jpg",
+  "datePublished": "2026-05-15T16:00:00.000Z",
+  "dateModified": "2026-05-15T16:44:49.715Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "zcd",
+      "url": "https://311duck.cn"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/106449882_p0.png"><link rel="canonical" href="https://311duck.cn/post/BYOW%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css?v=5.5.3"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css?v=7.1.0"><link rel="stylesheet" href="/pluginsSrc/@fancyapps/ui/dist/fancybox/fancybox.css?v=6.1.7" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":1,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js?v=4.12.0',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'BYOW个人记录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/font.css"><link rel="stylesheet" href="/css/footer.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-warehouse"></i><span> 仓库</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fas fa-list"></i><span> 追番</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐墙</span></a></li><li><a class="site-page child" href="/essays/"><i class="fa-fw fas fa-pen"></i><span> 随笔</span></a></li><li><a class="site-page child" href="/diy/"><i class="fa-fw fas fa-code"></i><span> DIY</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-compass"></i><span> 导航</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/202202230023069.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"></a><a class="nav-page-title" href="/"><span class="site-name">BYOW个人记录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-warehouse"></i><span> 仓库</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/bangumis/"><i class="fa-fw fas fa-list"></i><span> 追番</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐墙</span></a></li><li><a class="site-page child" href="/essays/"><i class="fa-fw fas fa-pen"></i><span> 随笔</span></a></li><li><a class="site-page child" href="/diy/"><i class="fa-fw fas fa-code"></i><span> DIY</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-compass"></i><span> 导航</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">BYOW个人记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-15T16:00:00.000Z" title="发表于 2026-05-16 00:00:00">2026-05-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-15T16:44:49.715Z" title="更新于 2026-05-16 00:44:49">2026-05-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CS/">CS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>从开始写 BYOW 到最后收尾，感觉这个项目比前面的 proj 更像是在真正做一个小型游戏系统。最后实现出来的版本大致包括：根据 seed 确定性生成随机世界，房间之间用 MST 保证连通，再额外加一些边让地图不那么像树；玩家可以通过 WASD 移动，<code>:Q</code> 保存，<code>L</code> 读取，<code>R</code> 回放，<code>M</code> 返回菜单；HUD 会显示鼠标所在 tile 的描述和当前收集进度；地图里有多个 light source，玩家走到灯上就会吃掉它，目标是吃完所有灯。</p>
+<p>比较满意的是后期把结构拆开了：<code>Engine</code> 主要负责菜单、输入、渲染循环和 save/load；<code>WorldGenerator</code> 专门负责地图生成；<code>GameState</code> 负责玩家位置、移动、灯光、视野和历史输入。这样比一开始全部堆在 <code>Engine</code> 里舒服很多。灯光系统用了两份世界：一份是真实逻辑地图 <code>world</code>，一份是经过光照计算后的 <code>lightedWorld</code>。有限视野默认开启，用的是玩家周围的菱形范围；灯光则根据光源距离和墙体遮挡决定地板显示成哪一档蓝色亮度。</p>
+<p>我的个人实现：<a target="_blank" rel="noopener" href="https://github.com/zcd-3/CS61B/tree/main/proj3">CS61B proj3 BYOW</a></p>
+<h2 id="Bresenham-直线算法">Bresenham 直线算法</h2>
+<p>我在灯光里需要判断：一个地板格能不能被某个光源照到。如果光源和目标 tile 中间有墙，那么这束光就应该被挡住；如果没有墙，就根据距离给这个 tile 一个亮度等级。</p>
+<p>这个判断用的是 Bresenham 直线算法。它原本是用来在像素格子上画直线的，但在这里可以拿来枚举“从光源到目标格子这条直线经过了哪些 tile”。</p>
+<p>核心想法：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">从 (x0, y0) 到 (x1, y1) 画一条尽量接近真实直线的格子路径。</span><br><span class="line">沿着这条路径检查每个 tile。</span><br><span class="line">如果中途遇到 WALL，说明没有 line of sight。</span><br><span class="line">否则说明光源能照到目标 tile。</span><br></pre></td></tr></table></figure>
+<p>代码形态大概是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">hasLineOfSight</span><span class="params">(<span class="type">int</span> x0, <span class="type">int</span> y0, <span class="type">int</span> x1, <span class="type">int</span> y1)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">dx</span> <span class="operator">=</span> Math.abs(x1 - x0);</span><br><span class="line">    <span class="type">int</span> <span class="variable">dy</span> <span class="operator">=</span> Math.abs(y1 - y0);</span><br><span class="line">    <span class="type">int</span> <span class="variable">sx</span> <span class="operator">=</span> x0 &lt; x1 ? <span class="number">1</span> : -<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">sy</span> <span class="operator">=</span> y0 &lt; y1 ? <span class="number">1</span> : -<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="variable">err</span> <span class="operator">=</span> dx - dy;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> x0;</span><br><span class="line">    <span class="type">int</span> <span class="variable">y</span> <span class="operator">=</span> y0;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (!(x == x1 &amp;&amp; y == y1)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(x == x0 &amp;&amp; y == y0) &amp;&amp; world[x][y] == Tileset.WALL) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">e2</span> <span class="operator">=</span> <span class="number">2</span> * err;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (e2 &gt; -dy) &#123;</span><br><span class="line">            err -= dy;</span><br><span class="line">            x += sx;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (e2 &lt; dx) &#123;</span><br><span class="line">            err += dx;</span><br><span class="line">            y += sy;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 <code>err</code> 可以理解成“当前格子路径和真实直线之间的误差”。每一步根据误差决定接下来应该往 x 方向走、往 y 方向走，还是两个方向都走。乘 2 的 <code>e2</code> 是为了避免处理半格误差时出现小数。这个算法的本质是：在整数网格里，每一步都选最接近真实直线的下一个格子。</p>
+<p>我这里的灯光没有用 BFS 扩散，因为 BFS 会让光沿着走廊拐弯；而我想要的是墙能挡光，光不应该自动绕过转角。所以更适合用 line of sight。</p>
+<p>灯光亮度用的是 square / Chebyshev distance：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">distance</span> <span class="operator">=</span> Math.max(Math.abs(x - light.x), Math.abs(y - light.y));</span><br></pre></td></tr></table></figure>
+<p>这样光圈是一层一层的方形，比较接近最后项目里的视觉效果。</p>
+<h2 id="Bitmask-BFS">Bitmask BFS</h2>
+<p>这个算法没有直接放进最后功能里，但它适合解决一个问题：如果给定一张地图，要求玩家吃完所有 lights 的最少操作数，应该怎么算？</p>
+<p>这个问题可以看成最短路，但普通 BFS 只记录玩家位置 <code>(x, y)</code> 不够，因为同一个位置下，“已经吃过哪些灯”也会影响后续选择。</p>
+<p>所以状态应该是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(x, y, mask)</span><br></pre></td></tr></table></figure>
+<p>其中 <code>mask</code> 是一个 bitmask，用二进制记录已经吃过哪些灯。比如有 4 个灯：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0000 - 一个灯都没吃</span><br><span class="line">0001 - 吃了第 0 个灯</span><br><span class="line">0101 - 吃了第 0 和第 2 个灯</span><br><span class="line">1111 - 所有灯都吃完</span><br></pre></td></tr></table></figure>
+<p>BFS 的目标就是第一次到达：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mask == (<span class="number">1</span> &lt;&lt; lightsCount) - <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>因为每次移动的代价都是 1，所以 BFS 第一次到达目标状态时，步数就是最少操作数。</p>
+<p>伪代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Queue&lt;State&gt; queue = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;&gt;();</span><br><span class="line"><span class="type">boolean</span>[][][] visited = <span class="keyword">new</span> <span class="title class_">boolean</span>[WIDTH][HEIGHT][<span class="number">1</span> &lt;&lt; lightsCount];</span><br><span class="line"></span><br><span class="line">queue.add(<span class="keyword">new</span> <span class="title class_">State</span>(startX, startY, startMask, <span class="number">0</span>));</span><br><span class="line">visited[startX][startY][startMask] = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (!queue.isEmpty()) &#123;</span><br><span class="line">    <span class="type">State</span> <span class="variable">cur</span> <span class="operator">=</span> queue.remove();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (cur.mask == fullMask) &#123;</span><br><span class="line">        <span class="keyword">return</span> cur.steps;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (direction : directions) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">nx</span> <span class="operator">=</span> cur.x + dx;</span><br><span class="line">        <span class="type">int</span> <span class="variable">ny</span> <span class="operator">=</span> cur.y + dy;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!canWalk(nx, ny)) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">nextMask</span> <span class="operator">=</span> cur.mask;</span><br><span class="line">        <span class="keyword">if</span> (lightIndex[nx][ny] != -<span class="number">1</span>) &#123;</span><br><span class="line">            nextMask |= <span class="number">1</span> &lt;&lt; lightIndex[nx][ny];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!visited[nx][ny][nextMask]) &#123;</span><br><span class="line">            visited[nx][ny][nextMask] = <span class="literal">true</span>;</span><br><span class="line">            queue.add(<span class="keyword">new</span> <span class="title class_">State</span>(nx, ny, nextMask, cur.steps + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里 <code>visited</code> 必须是三维的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">visited[x][y][mask]</span><br></pre></td></tr></table></figure>
+<p>因为同一个位置但吃灯状态不同，不能视作同一个状态。比如都在 <code>(10, 5)</code>，一个状态只吃了 1 个灯，另一个状态已经吃了 5 个灯，它们后续意义完全不同。如果只用 <code>visited[x][y]</code>，就会错误剪枝。</p>
+<p>复杂度是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O(WIDTH * HEIGHT * 2^k)</span><br></pre></td></tr></table></figure>
+<p>其中 <code>k</code> 是灯的数量。灯数量少的时候这个方法很直接；灯很多时，<code>2^k</code> 会变得很大，可以考虑先算两两最短路，再做 TSP 风格的 bitmask DP。</p>
+<p>Generated by GPT-5.5(AI真的是太好用了)</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/BYOW/">BYOW</a></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/post/gitlet%E4%B8%AA%E4%BA%BA%E8%AE%B0%E5%BD%95/" title="gitlet个人记录"><img class="cover" src="/img/202202230023069.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">gitlet个人记录</div></div><div class="info-2"><div class="info-item-1">从开始动手到完工约16h 跨度4days，这几天基本上除了上课就是写这个 当然很多东西问了ai,把我的copilot额度差点干完了 开始前看完spec人都是懵的，而且英语太差很多具体意思扫一眼根本看不懂，参考了别人的persistence再仔细钻研(问ai)后脑子才慢慢有个框架。感觉最难的部分就是起步阶段，起步啥都没有，想写点什么就会发现它的依赖项还没写，去写依赖项时又发现它依赖别的，或又依赖回刚才的东西，会比较困难一点。而且debug起来比较麻烦，反正我是纯通过test结果自己找bug，找得挺痛苦的。现在回看之前所有的project都跟过家家一样，gitlet的skeleton代码简直就是一具空壳，you have to design almost everything by youself. 我的个人实现： CS61B proj2 Gitlet 一些记录下来的bug 1 in Commit.java 12345678910111213/** Update the stage area to a new commit. */  public void clearStage() ...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">zcd</div><div class="author-info-description">-2</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/zcd-3"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Bresenham-%E7%9B%B4%E7%BA%BF%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">Bresenham 直线算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bitmask-BFS"><span class="toc-number">2.</span> <span class="toc-text">Bitmask BFS</span></a></li></ol></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"></div><div class="footer_custom_text"><p><a style="margin-inline:5px" target="_blank" href="https://hexo.io/"><img src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&logo=hexo" title="博客框架为Hexo"></a><a style="margin-inline:5px" target="_blank" href="https://butterfly.js.org/"><img src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&logo=bitdefender" title="主题采用butterfly"></a><a style="margin-inline:5px" target="_blank" href="https://www.cloudflare.com/"><img src="https://img.shields.io/badge/CDN-Cloudflare-orange?style=flat&logo=cloudflare" title="本站使用Cloudflare为静态资源提供CDN加速"></a><a style="margin-inline:5px" target="_blank" href="https://vercel.com/ "><img src="https://img.shields.io/badge/Hosted-Vercel-brightgreen?style=flat&logo=Vercel" title="本站托管于Vercel"></a><a style="margin-inline:5px" target="_blank" href="https://github.com/"><img src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&logo=GitHub" title="本站项目由Github托管"></a><a style="margin-inline:5px" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&logo=Claris" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"></a></p></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.3"></script><script src="/js/main.js?v=5.5.3"></script><script src="/js/tw_cn.js?v=5.5.3"></script><script src="/pluginsSrc/@fancyapps/ui/dist/fancybox/fancybox.umd.js?v=6.1.7"></script><div class="js-pjax"><script>(async () => {
+  const showKatex = () => {
+    document.querySelectorAll('#article-container .katex').forEach(el => el.classList.add('katex-show'))
+  }
+
+  if (!window.katex_js_css) {
+    window.katex_js_css = true
+    await btf.getCSS('/pluginsSrc/katex/dist/katex.min.css?v=0.16.27')
+    if (true) {
+      await btf.getScript('/pluginsSrc/katex/dist/contrib/copy-tex.min.js?v=0.16.27')
+    }
+  }
+
+  showKatex()
+})()</script><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'zcd-3/zcd-3.github.io',
+      'data-repo-id': 'R_kgDOQzcTVA',
+      'data-category-id': 'DIC_kwDOQzcTVM4C0mTc',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script defer="defer" id="ribbon" src="/pluginsSrc/butterfly-extsrc/dist/canvas-ribbon.min.js?v=1.1.6" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.5.3"></script></div></div></body></html>
