@@ -229,36 +229,36 @@
 
   <url>
     <loc>https://311duck.cn/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
-    <loc>https://311duck.cn/tags/BYOW/</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://311duck.cn/tags/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://311duck.cn/tags/%E6%95%B0%E5%AD%A6/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://311duck.cn/tags/BYOW/</loc>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://311duck.cn/tags/gitlet/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -266,22 +266,22 @@
 
   
   <url>
-    <loc>https://311duck.cn/categories/CS/</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://311duck.cn/categories/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://311duck.cn/categories/%E6%95%B0%E5%AD%A6/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://311duck.cn/categories/CS/</loc>
+    <lastmod>2026-06-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
